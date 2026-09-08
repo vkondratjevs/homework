@@ -1,0 +1,3 @@
+app.swagger_ui:
+    resource: '@NelmioApiDocBundle/config/routing/swaggerui.php'
+    prefix: /api/doc
