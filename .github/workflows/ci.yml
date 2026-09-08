@@ -1,0 +1,29 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build and start containers
+        run: docker compose up -d --build
+
+      - name: Install dependencies
+        run: docker compose exec -T php composer install --no-interaction --prefer-dist
+
+      - name: Run PHPStan
+        run: docker compose exec -T php vendor/bin/phpstan analyse -c phpstan.dist.neon
+
+      - name: Run PHPUnit
+        run: docker compose exec -T php php bin/phpunit
+
+      - name: Stop containers
+        if: always()
+        run: docker compose down
