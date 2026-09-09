@@ -9,6 +9,7 @@ use App\LoanApplication\Application\Handler\CreateApplicationHandler;
 use App\LoanApplication\Infrastructure\Http\Dto\ApplicationResponse;
 use App\LoanApplication\Infrastructure\Http\Dto\CreateApplicationRequest;
 use OpenApi\Attributes as OA;
+use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -57,7 +58,7 @@ final class ApplicationController extends AbstractController
         ),
     )]
     #[Route('/applications', name: 'applications_create', methods: ['POST'])]
-    public function create(#[MapRequestPayload] CreateApplicationRequest $dto): JsonResponse
+    public function create(#[MapRequestPayload] CreateApplicationRequest $dto, LoggerInterface $logger): JsonResponse
     {
         $application = ($this->createApplicationHandler)(new CreateApplication(
             personalCode: $dto->personalCode,
@@ -65,6 +66,16 @@ final class ApplicationController extends AbstractController
             term: $dto->term,
             currency: $dto->currency,
         ));
+
+        $logger->debug('Application created', [
+            'applicationId' => $application->getId()->toRfc4122(),
+            'personalCode' => substr($application->getPersonalCode(), 0, -5) . '*****',
+            'amount' => $application->getAmount(),
+            'term' => $application->getTerm(),
+            'currency' => $application->getCurrency(),
+            'status' => $application->getStatus()->name,
+            'createdAt' => $application->getCreatedAt()->format(\DATE_ATOM),
+        ]);
 
         return new JsonResponse(ApplicationResponse::fromEntity($application), Response::HTTP_CREATED);
     }
