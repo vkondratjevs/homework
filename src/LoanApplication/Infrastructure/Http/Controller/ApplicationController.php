@@ -6,21 +6,27 @@ namespace App\LoanApplication\Infrastructure\Http\Controller;
 
 use App\LoanApplication\Application\Command\CreateApplication;
 use App\LoanApplication\Application\Handler\CreateApplicationHandler;
+use App\LoanApplication\Domain\Exception\ApplicationNotFoundException;
+use App\LoanApplication\Domain\Repository\ApplicationRepositoryInterface;
 use App\LoanApplication\Infrastructure\Http\Dto\ApplicationResponse;
 use App\LoanApplication\Infrastructure\Http\Dto\CreateApplicationRequest;
 use OpenApi\Attributes as OA;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Routing\Requirement\Requirement;
+use Symfony\Component\Uid\Uuid;
 
 #[OA\Tag(name: 'Applications')]
 final class ApplicationController extends AbstractController
 {
     public function __construct(
         private readonly CreateApplicationHandler $createApplicationHandler,
+        private readonly ApplicationRepositoryInterface $applications,
     ) {
     }
 
@@ -57,7 +63,7 @@ final class ApplicationController extends AbstractController
             ],
         ),
     )]
-    #[Route('/applications', name: 'applications_create', methods: ['POST'])]
+    #[Route('/applications', name: 'applications_create', methods: [Request::METHOD_POST])]
     public function create(#[MapRequestPayload] CreateApplicationRequest $dto, LoggerInterface $logger): JsonResponse
     {
         $application = ($this->createApplicationHandler)(new CreateApplication(
@@ -78,5 +84,36 @@ final class ApplicationController extends AbstractController
         ]);
 
         return new JsonResponse(ApplicationResponse::fromEntity($application), Response::HTTP_CREATED);
+    }
+
+    #[OA\Get(summary: 'Get an application by id')]
+    #[OA\Response(
+        response: 200,
+        description: 'Application details',
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(property: 'id', type: 'string', format: 'uuid', example: '01991f3a-1234-7abc-8def-0123456789ab'),
+                new OA\Property(property: 'personalCode', type: 'string', example: '010199-12345'),
+                new OA\Property(property: 'amount', type: 'string', example: '1000.00'),
+                new OA\Property(property: 'term', type: 'integer', example: 24),
+                new OA\Property(property: 'currency', type: 'string', example: 'EUR'),
+                new OA\Property(property: 'status', type: 'string', example: 'Pending'),
+                new OA\Property(property: 'createdAt', type: 'string', format: 'date-time'),
+            ],
+        ),
+    )]
+    #[OA\Response(
+        response: 404,
+        description: 'Application not found',
+        content: new OA\JsonContent(properties: [
+            new OA\Property(property: 'error', type: 'string', example: 'Application "..." was not found.'),
+        ]),
+    )]
+    #[Route('/applications/{id}', name: 'applications_get', requirements: ['id' => Requirement::UUID], methods: [Request::METHOD_GET])]
+    public function get(Uuid $id): JsonResponse
+    {
+        $application = $this->applications->find($id) ?? throw ApplicationNotFoundException::withId($id);
+
+        return new JsonResponse(ApplicationResponse::fromEntity($application));
     }
 }

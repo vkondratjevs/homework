@@ -13,3 +13,7 @@ Content-Type: application/json
 }
 
 
+### Get by ID
+GET {{host}}/applications/01a08527-894b-74df-b66f-8eaaaf6b0ae0
+Content-Type: application/json
+

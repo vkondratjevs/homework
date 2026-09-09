@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Shared\Http;
 
+use App\LoanApplication\Domain\Exception\ApplicationNotFoundException;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -13,21 +14,18 @@ use Symfony\Component\Serializer\Exception\PartialDenormalizationException;
 use Symfony\Component\Validator\ConstraintViolationListInterface;
 use Symfony\Component\Validator\Exception\ValidationFailedException;
 
-/**
- * Keeps every error response as JSON instead of Symfony's default HTML
- * error page — this is an API, a browser-oriented error page never applies.
- *
- * #[MapRequestPayload] wraps the real cause (ValidationFailedException for
- * constraint violations, PartialDenormalizationException for JSON/type
- * mismatches) inside a generic HttpException, so both are unwrapped here
- * to keep a single, consistent {"errors": [{field, message}]} shape.
- */
 #[AsEventListener]
 final class ApiExceptionListener
 {
     public function __invoke(ExceptionEvent $event): void
     {
         $exception = $event->getThrowable();
+
+        if ($exception instanceof ApplicationNotFoundException) {
+            $event->setResponse(new JsonResponse(['error' => $exception->getMessage()], Response::HTTP_NOT_FOUND));
+
+            return;
+        }
 
         foreach ($this->chain($exception) as $cause) {
             if ($cause instanceof ValidationFailedException) {
