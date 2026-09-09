@@ -23,3 +23,6 @@ services:
     # please note that last definitions always *replace* previous ones
     App\LoanApplication\Domain\Repository\ApplicationRepositoryInterface:
         alias: App\LoanApplication\Infrastructure\Persistence\DoctrineApplicationRepository
+
+    App\LoanApplication\Domain\TransactionalSessionInterface:
+        alias: App\LoanApplication\Infrastructure\Persistence\DoctrineTransactionalSession

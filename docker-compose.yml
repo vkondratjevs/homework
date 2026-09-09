@@ -9,6 +9,18 @@ services:
             database:
                 condition: service_healthy
 
+    worker-outbox:
+        build:
+            context: .
+            dockerfile: docker/php/Dockerfile
+        volumes:
+            - .:/var/www/html
+        command: bin/console messenger:consume applications_outbox --time-limit=3600 --memory-limit=128M -vv
+        restart: unless-stopped
+        depends_on:
+            database:
+                condition: service_healthy
+
     nginx:
         image: nginx:alpine
         ports:

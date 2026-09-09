@@ -1,0 +1,11 @@
+framework:
+    messenger:
+        transports:
+            applications_outbox:
+                dsn: 'doctrine://default?queue_name=applications_outbox'
+                options:
+                    table_name: outbox_messages
+                    auto_setup: false
+
+        routing:
+            App\LoanApplication\Application\Command\CheckBorrower: applications_outbox
