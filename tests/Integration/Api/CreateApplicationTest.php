@@ -10,6 +10,9 @@ use App\Tests\Integration\Support\ApiTestCase;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Uid\Uuid;
 
+/**
+ * @phpstan-import-type ApplicationShape from ApiTestCase
+ */
 final class CreateApplicationTest extends ApiTestCase
 {
     public function testCreateApplicationSuccessAsPending(): void
@@ -23,13 +26,13 @@ final class CreateApplicationTest extends ApiTestCase
 
         self::assertSame(Response::HTTP_CREATED, $this->client->getResponse()->getStatusCode());
 
+        /** @var ApplicationShape $body */
         $body = $this->decodeJsonResponse();
         self::assertSame('010199-12345', $body['personalCode']);
         self::assertSame('1000.00', $body['amount']);
         self::assertSame(24, $body['term']);
         self::assertSame('EUR', $body['currency']);
         self::assertSame('Pending', $body['status']);
-        self::assertIsString($body['id']);
 
         $this->entityManager->clear();
 
@@ -55,6 +58,7 @@ final class CreateApplicationTest extends ApiTestCase
 
         self::assertSame(Response::HTTP_UNPROCESSABLE_ENTITY, $this->client->getResponse()->getStatusCode());
 
+        /** @var array{errors: list<array{field: string, message: string}>} $body */
         $body = $this->decodeJsonResponse();
         self::assertArrayHasKey('errors', $body);
 

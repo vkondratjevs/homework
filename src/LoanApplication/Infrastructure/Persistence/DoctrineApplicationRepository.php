@@ -36,6 +36,7 @@ final readonly class DoctrineApplicationRepository implements ApplicationReposit
         /** @var list<Application> $items */
         $items = $repository->createQueryBuilder('a')
             ->orderBy('a.createdAt', 'DESC')
+            ->addOrderBy('a.id', 'DESC')
             ->setFirstResult(($page - 1) * $limit)
             ->setMaxResults($limit)
             ->getQuery()

@@ -24,10 +24,54 @@ use Symfony\Component\Uid\Uuid;
 #[OA\Tag(name: 'Applications')]
 final class ApplicationController extends AbstractController
 {
+    private const int DEFAULT_PAGE_SIZE = 20;
+    private const int MAX_PAGE_SIZE = 100;
+
     public function __construct(
         private readonly CreateApplicationHandler $createApplicationHandler,
         private readonly ApplicationRepositoryInterface $applications,
     ) {
+    }
+
+    #[OA\Get(summary: 'List applications')]
+    #[OA\Parameter(name: 'page', description: 'Page number (1-based)', in: 'query', schema: new OA\Schema(type: 'integer', default: 1, minimum: 1))]
+    #[OA\Parameter(name: 'limit', description: 'Items per page', in: 'query', schema: new OA\Schema(type: 'integer', default: self::DEFAULT_PAGE_SIZE, maximum: self::MAX_PAGE_SIZE, minimum: 1))]
+    #[OA\Response(
+        response: 200,
+        description: 'A page of applications',
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(property: 'items', type: 'array', items: new OA\Items(
+                    properties: [
+                        new OA\Property(property: 'id', type: 'string', format: 'uuid', example: '01991f3a-1234-7abc-8def-0123456789ab'),
+                        new OA\Property(property: 'personalCode', type: 'string', example: '010199-12345'),
+                        new OA\Property(property: 'amount', type: 'string', example: '1000.00'),
+                        new OA\Property(property: 'term', type: 'integer', example: 24),
+                        new OA\Property(property: 'currency', type: 'string', example: 'EUR'),
+                        new OA\Property(property: 'status', type: 'string', example: 'Pending'),
+                        new OA\Property(property: 'createdAt', type: 'string', format: 'date-time'),
+                    ],
+                )),
+                new OA\Property(property: 'page', type: 'integer', example: 1),
+                new OA\Property(property: 'limit', type: 'integer', example: 20),
+                new OA\Property(property: 'total', type: 'integer', example: 42),
+            ],
+        ),
+    )]
+    #[Route('/applications', name: 'applications_list', methods: [Request::METHOD_GET])]
+    public function list(Request $request): JsonResponse
+    {
+        $page = max(1, $request->query->getInt('page', 1));
+        $limit = min(self::MAX_PAGE_SIZE, max(1, $request->query->getInt('limit', self::DEFAULT_PAGE_SIZE)));
+
+        $result = $this->applications->findPage($page, $limit);
+
+        return new JsonResponse([
+            'items' => array_map(ApplicationResponse::fromEntity(...), $result['items']),
+            'page' => $page,
+            'limit' => $limit,
+            'total' => $result['total'],
+        ]);
     }
 
     #[OA\Post(

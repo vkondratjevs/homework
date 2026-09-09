@@ -8,6 +8,17 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
+/**
+ * @phpstan-type ApplicationShape array{
+ *     id: string,
+ *     personalCode: string,
+ *     amount: string,
+ *     term: int,
+ *     currency: string,
+ *     status: string,
+ *     createdAt: string,
+ * }
+ */
 abstract class ApiTestCase extends WebTestCase
 {
     protected KernelBrowser $client;
@@ -18,6 +29,7 @@ abstract class ApiTestCase extends WebTestCase
         parent::setUp();
 
         $this->client = static::createClient();
+        $this->client->disableReboot();
 
         $entityManager = static::getContainer()->get(EntityManagerInterface::class);
         assert($entityManager instanceof EntityManagerInterface);
@@ -40,8 +52,8 @@ abstract class ApiTestCase extends WebTestCase
     protected function postJson(string $uri, array $payload): void
     {
         $this->client->request(
-            'POST',
-            $uri,
+            method: 'POST',
+            uri: $uri,
             server: ['CONTENT_TYPE' => 'application/json'],
             content: json_encode($payload, \JSON_THROW_ON_ERROR),
         );
