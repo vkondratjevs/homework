@@ -1,0 +1,11 @@
+when@dev:
+    fake_credit_bureau_verify:
+        path: /v1/verifications
+        controller: App\LoanApplication\Infrastructure\Verification\Stub\FakeCreditBureauController
+        methods: [POST]
+
+when@test:
+    fake_credit_bureau_verify:
+        path: /v1/verifications
+        controller: App\LoanApplication\Infrastructure\Verification\Stub\FakeCreditBureauController
+        methods: [POST]

@@ -1,0 +1,6 @@
+framework:
+    http_client:
+        scoped_clients:
+            credit_bureau:
+                base_uri: '%env(CREDIT_BUREAU_BASE_URL)%'
+                timeout: 5
