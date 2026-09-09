@@ -18,10 +18,10 @@ final readonly class CreateApplicationHandler
     public function __invoke(CreateApplication $command): Application
     {
         $application = Application::create(
-            $command->personalCode,
-            $command->amount,
-            $command->term,
-            $command->currency,
+            personalCode: $command->personalCode,
+            amount: $command->amount,
+            term: $command->term,
+            currency: $command->currency,
         );
 
         $this->applicationRepository->save($application);

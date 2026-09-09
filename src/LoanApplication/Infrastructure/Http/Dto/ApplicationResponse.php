@@ -7,7 +7,7 @@ namespace App\LoanApplication\Infrastructure\Http\Dto;
 use App\LoanApplication\Domain\Entity\Application;
 use JsonSerializable;
 
-final readonly class ApplicationView implements JsonSerializable
+final readonly class ApplicationResponse implements JsonSerializable
 {
     private function __construct(
         private string $id,
@@ -23,13 +23,13 @@ final readonly class ApplicationView implements JsonSerializable
     public static function fromEntity(Application $application): self
     {
         return new self(
-            $application->getId()->toRfc4122(),
-            $application->getPersonalCode(),
-            $application->getAmount(),
-            $application->getTerm(),
-            $application->getCurrency(),
-            $application->getStatus()->name,
-            $application->getCreatedAt()->format(\DATE_ATOM),
+            id: $application->getId()->toRfc4122(),
+            personalCode: $application->getPersonalCode(),
+            amount: $application->getAmount(),
+            term: $application->getTerm(),
+            currency: $application->getCurrency(),
+            status: $application->getStatus()->name,
+            createdAt: $application->getCreatedAt()->format(\DATE_ATOM),
         );
     }
 

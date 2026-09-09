@@ -6,19 +6,20 @@ namespace App\LoanApplication\Infrastructure\Http\Controller;
 
 use App\LoanApplication\Application\Command\CreateApplication;
 use App\LoanApplication\Application\Handler\CreateApplicationHandler;
-use App\LoanApplication\Infrastructure\Http\Dto\ApplicationView;
+use App\LoanApplication\Infrastructure\Http\Dto\ApplicationResponse;
 use App\LoanApplication\Infrastructure\Http\Dto\CreateApplicationRequest;
 use OpenApi\Attributes as OA;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[OA\Tag(name: 'Applications')]
-final readonly class ApplicationController
+final class ApplicationController extends AbstractController
 {
     public function __construct(
-        private CreateApplicationHandler $createApplicationHandler,
+        private readonly CreateApplicationHandler $createApplicationHandler,
     ) {
     }
 
@@ -59,12 +60,12 @@ final readonly class ApplicationController
     public function create(#[MapRequestPayload] CreateApplicationRequest $dto): JsonResponse
     {
         $application = ($this->createApplicationHandler)(new CreateApplication(
-            $dto->personalCode,
-            $dto->amount,
-            $dto->term,
-            $dto->currency,
+            personalCode: $dto->personalCode,
+            amount: $dto->amount,
+            term: $dto->term,
+            currency: $dto->currency,
         ));
 
-        return new JsonResponse(ApplicationView::fromEntity($application), Response::HTTP_CREATED);
+        return new JsonResponse(ApplicationResponse::fromEntity($application), Response::HTTP_CREATED);
     }
 }
