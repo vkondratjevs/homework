@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\LoanApplication\Domain\Entity;
 
 use App\LoanApplication\Domain\Enum\ApplicationStatus;
+use App\LoanApplication\Domain\Exception\ApplicationAlreadyResolvedException;
 use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Uid\Uuid;
@@ -101,5 +102,35 @@ class Application
     public function getUpdatedAt(): DateTimeImmutable
     {
         return $this->updatedAt;
+    }
+
+    public function approve(): void
+    {
+        $this->transitionTo(ApplicationStatus::Approved);
+    }
+
+    public function reject(): void
+    {
+        $this->transitionTo(ApplicationStatus::Rejected);
+    }
+
+    public function failVerification(): void
+    {
+        $this->transitionTo(ApplicationStatus::VerificationFailed);
+    }
+
+    private function transitionTo(ApplicationStatus $status): void
+    {
+        $this->guardPending();
+
+        $this->status = $status;
+        $this->updatedAt = new DateTimeImmutable('now', new \DateTimeZone('UTC'));
+    }
+
+    private function guardPending(): void
+    {
+        if (ApplicationStatus::Pending !== $this->status) {
+            throw ApplicationAlreadyResolvedException::withId($this->id);
+        }
     }
 }

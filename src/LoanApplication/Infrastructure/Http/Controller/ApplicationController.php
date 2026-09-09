@@ -67,10 +67,10 @@ final class ApplicationController extends AbstractController
         $result = $this->applications->findPage($page, $limit);
 
         return new JsonResponse([
-            'items' => array_map(ApplicationResponse::fromEntity(...), $result['items']),
+            'items' => array_map(ApplicationResponse::fromEntity(...), $result->items),
             'page' => $page,
             'limit' => $limit,
-            'total' => $result['total'],
+            'total' => $result->total,
         ]);
     }
 
@@ -156,7 +156,7 @@ final class ApplicationController extends AbstractController
     #[Route('/applications/{id}', name: 'applications_get', requirements: ['id' => Requirement::UUID], methods: [Request::METHOD_GET])]
     public function get(Uuid $id): JsonResponse
     {
-        $application = $this->applications->find($id) ?? throw ApplicationNotFoundException::withId($id);
+        $application = $this->applications->findById($id) ?? throw ApplicationNotFoundException::withId($id);
 
         return new JsonResponse(ApplicationResponse::fromEntity($application));
     }

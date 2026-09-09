@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\LoanApplication\Infrastructure\Persistence;
 
 use App\LoanApplication\Domain\Entity\Application;
+use App\LoanApplication\Domain\Enum\ApplicationStatus;
+use App\LoanApplication\Domain\Repository\ApplicationPage;
 use App\LoanApplication\Domain\Repository\ApplicationRepositoryInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Uid\Uuid;
@@ -13,7 +15,8 @@ final readonly class DoctrineApplicationRepository implements ApplicationReposit
 {
     public function __construct(
         private EntityManagerInterface $entityManager,
-    ){}
+    ) {
+    }
 
     public function save(Application $application): void
     {
@@ -21,15 +24,31 @@ final readonly class DoctrineApplicationRepository implements ApplicationReposit
         $this->entityManager->flush();
     }
 
-    public function find(Uuid $id): ?Application
+    public function updateStatus(Application $application, ApplicationStatus $previousStatus): bool
+    {
+        $affectedRows = $this->entityManager->getConnection()->executeStatement(
+            sql: 'UPDATE applications SET status = :status, updated_at = :updatedAt WHERE id = :id AND status = :previousStatus',
+            params: [
+                'status' => $application->getStatus()->value,
+                'updatedAt' => $application->getUpdatedAt(),
+                'id' => $application->getId(),
+                'previousStatus' => $previousStatus->value,
+            ],
+            types: [
+                'updatedAt' => 'datetimetz_immutable',
+                'id' => 'uuid',
+            ],
+        );
+
+        return $affectedRows > 0;
+    }
+
+    public function findById(Uuid $id): ?Application
     {
         return $this->entityManager->find(Application::class, $id);
     }
 
-    /**
-     * @return array{items: list<Application>, total: int}
-     */
-    public function findPage(int $page, int $limit): array
+    public function findPage(int $page, int $limit): ApplicationPage
     {
         $repository = $this->entityManager->getRepository(Application::class);
 
@@ -42,9 +61,9 @@ final readonly class DoctrineApplicationRepository implements ApplicationReposit
             ->getQuery()
             ->getResult();
 
-        return [
-            'items' => $items,
-            'total' => $repository->count(),
-        ];
+        return new ApplicationPage(
+            items: $items,
+            total: $repository->count([]),
+        );
     }
 }
