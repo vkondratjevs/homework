@@ -21,6 +21,11 @@ jobs:
       - name: Run PHPStan
         run: docker compose exec -T php vendor/bin/phpstan analyse -c phpstan.dist.neon
 
+      - name: Prepare test database
+        run: |
+          docker compose exec -T php bin/console doctrine:database:create --env=test --if-not-exists
+          docker compose exec -T php bin/console doctrine:migrations:migrate -n --env=test
+
       - name: Run PHPUnit
         run: docker compose exec -T php php bin/phpunit
 
