@@ -7,6 +7,7 @@ namespace App\Tests\Unit\LoanApplication\Infrastructure\Verification;
 use App\LoanApplication\Domain\Verification\Exception\RetryableVerificationException;
 use App\LoanApplication\Domain\Verification\Exception\TerminalVerificationException;
 use App\LoanApplication\Domain\Verification\VerificationDecision;
+use App\LoanApplication\Domain\Verification\VerificationRequest;
 use App\LoanApplication\Infrastructure\Verification\CreditBureauClient;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpClient\MockHttpClient;
@@ -74,6 +75,6 @@ final class CreditBureauClientTest extends TestCase
     private function verifyAgainst(MockResponse $response): VerificationDecision
     {
         return new CreditBureauClient(new MockHttpClient($response))
-            ->verify(Uuid::v7(), '010199-12345', '1000.00', 24);
+            ->verify(new VerificationRequest(Uuid::v7(), '010199-12345', '1000.00', 24));
     }
 }

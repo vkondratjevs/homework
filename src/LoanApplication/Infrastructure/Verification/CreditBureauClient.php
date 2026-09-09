@@ -8,8 +8,8 @@ use App\LoanApplication\Domain\Verification\BorrowerVerificationClientInterface;
 use App\LoanApplication\Domain\Verification\Exception\RetryableVerificationException;
 use App\LoanApplication\Domain\Verification\Exception\TerminalVerificationException;
 use App\LoanApplication\Domain\Verification\VerificationDecision;
+use App\LoanApplication\Domain\Verification\VerificationRequest;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
-use Symfony\Component\Uid\Uuid;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
@@ -21,15 +21,15 @@ final readonly class CreditBureauClient implements BorrowerVerificationClientInt
     ) {
     }
 
-    public function verify(Uuid $applicationId, string $personalCode, string $amount, int $term): VerificationDecision
+    public function verify(VerificationRequest $request): VerificationDecision
     {
         try {
             $response = $this->httpClient->request('POST', '/v1/verifications', [
                 'json' => [
-                    'applicationId' => $applicationId->toRfc4122(),
-                    'personalIdentificationNumber' => $personalCode,
-                    'amount' => $amount,
-                    'term' => $term,
+                    'applicationId' => $request->applicationId->toRfc4122(),
+                    'personalIdentificationNumber' => $request->personalCode,
+                    'amount' => $request->amount,
+                    'term' => $request->term,
                 ],
             ]);
 

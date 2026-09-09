@@ -7,6 +7,7 @@ namespace App\Tests\Integration\Verification;
 use App\LoanApplication\Domain\Verification\Exception\RetryableVerificationException;
 use App\LoanApplication\Domain\Verification\Exception\TerminalVerificationException;
 use App\LoanApplication\Domain\Verification\VerificationDecision;
+use App\LoanApplication\Domain\Verification\VerificationRequest;
 use App\LoanApplication\Infrastructure\Verification\CreditBureauClient;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpClient\HttpClient;
@@ -16,14 +17,14 @@ final class CreditBureauClientWiringTest extends TestCase
 {
     public function testApproveMagicCodeReachesTheFakeVendorOverRealHttp(): void
     {
-        $decision = $this->creditBureauClient()->verify(Uuid::v7(), '010101-00001', '1000.00', 24);
+        $decision = $this->creditBureauClient()->verify(new VerificationRequest(Uuid::v7(), '010101-00001', '1000.00', 24));
 
         self::assertSame(VerificationDecision::Approve, $decision);
     }
 
     public function testRejectMagicCodeReachesTheFakeVendorOverRealHttp(): void
     {
-        $decision = $this->creditBureauClient()->verify(Uuid::v7(), '010101-00002', '1000.00', 24);
+        $decision = $this->creditBureauClient()->verify(new VerificationRequest(Uuid::v7(), '010101-00002', '1000.00', 24));
 
         self::assertSame(VerificationDecision::Reject, $decision);
     }
@@ -32,14 +33,14 @@ final class CreditBureauClientWiringTest extends TestCase
     {
         $this->expectException(RetryableVerificationException::class);
 
-        $this->creditBureauClient()->verify(Uuid::v7(), '010101-00429', '1000.00', 24);
+        $this->creditBureauClient()->verify(new VerificationRequest(Uuid::v7(), '010101-00429', '1000.00', 24));
     }
 
     public function testBadRequestMagicCodeIsClassifiedAsTerminal(): void
     {
         $this->expectException(TerminalVerificationException::class);
 
-        $this->creditBureauClient()->verify(Uuid::v7(), '010101-00400', '1000.00', 24);
+        $this->creditBureauClient()->verify(new VerificationRequest(Uuid::v7(), '010101-00400', '1000.00', 24));
     }
 
     private function creditBureauClient(): CreditBureauClient
