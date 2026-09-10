@@ -2,20 +2,20 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit\LoanApplication\Application\Handler;
+namespace App\Tests\Unit\LoanApplication\Infrastructure\Persistence;
 
 use App\LoanApplication\Application\Command\CheckBorrower;
 use App\LoanApplication\Application\Command\CreateApplication;
-use App\LoanApplication\Application\Handler\CreateApplicationHandler;
 use App\LoanApplication\Domain\Entity\Application;
 use App\LoanApplication\Domain\Enum\ApplicationStatus;
 use App\LoanApplication\Domain\Repository\ApplicationRepositoryInterface;
-use App\LoanApplication\Domain\TransactionalSessionInterface;
+use App\LoanApplication\Infrastructure\Persistence\DoctrineCreateApplicationHandler;
+use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Messenger\Envelope;
 use Symfony\Component\Messenger\MessageBusInterface;
 
-final class CreateApplicationHandlerTest extends TestCase
+final class DoctrineCreateApplicationHandlerTest extends TestCase
 {
     public function testItBuildsAPendingApplicationFromTheCommandAndSavesIt(): void
     {
@@ -41,11 +41,11 @@ final class CreateApplicationHandlerTest extends TestCase
             }))
             ->willReturn(new Envelope(new \stdClass()));
 
-        $transactionalSession = $this->createStub(TransactionalSessionInterface::class);
-        $transactionalSession->method('transactional')
+        $entityManager = $this->createStub(EntityManagerInterface::class);
+        $entityManager->method('wrapInTransaction')
             ->willReturnCallback(static fn (callable $operation) => $operation());
 
-        $handler = new CreateApplicationHandler($repository, $transactionalSession, $messageBus);
+        $handler = new DoctrineCreateApplicationHandler($repository, $messageBus, $entityManager);
 
         $result = $handler(new CreateApplication('010199-12345', '1000.00', 24, 'EUR'));
 

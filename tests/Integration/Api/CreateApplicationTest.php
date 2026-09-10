@@ -67,10 +67,8 @@ final class CreateApplicationTest extends ApiTestCase
 
     private function countApplications(): int
     {
-        $count = $this->entityManager->getConnection()
+        return (int) $this->entityManager->getConnection()
             ->executeQuery('SELECT COUNT(*) FROM applications')
             ->fetchOne();
-
-        return (int) $count;
     }
 }

@@ -63,7 +63,7 @@ final readonly class DoctrineApplicationRepository implements ApplicationReposit
 
         return new ApplicationPage(
             items: $items,
-            total: $repository->count([]),
+            total: $repository->count(),
         );
     }
 }

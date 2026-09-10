@@ -2,21 +2,22 @@
 
 declare(strict_types=1);
 
-namespace App\LoanApplication\Application\Handler;
+namespace App\LoanApplication\Infrastructure\Persistence;
 
 use App\LoanApplication\Application\Command\CheckBorrower;
 use App\LoanApplication\Application\Command\CreateApplication;
+use App\LoanApplication\Application\Handler\CreateApplicationHandlerInterface;
 use App\LoanApplication\Domain\Entity\Application;
 use App\LoanApplication\Domain\Repository\ApplicationRepositoryInterface;
-use App\LoanApplication\Domain\TransactionalSessionInterface;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
 
-final readonly class CreateApplicationHandler
+final readonly class DoctrineCreateApplicationHandler implements CreateApplicationHandlerInterface
 {
     public function __construct(
         private ApplicationRepositoryInterface $applicationRepository,
-        private TransactionalSessionInterface $transactionalSession,
         private MessageBusInterface $messageBus,
+        private EntityManagerInterface $entityManager,
     ) {
     }
 
@@ -29,7 +30,7 @@ final readonly class CreateApplicationHandler
             currency: $command->currency,
         );
 
-        $this->transactionalSession->transactional(function () use ($application): void {
+        $this->entityManager->wrapInTransaction(function () use ($application): void {
             $this->applicationRepository->save($application);
             $this->messageBus->dispatch(new CheckBorrower($application->getId()));
         });

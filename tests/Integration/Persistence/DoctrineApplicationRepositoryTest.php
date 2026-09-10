@@ -61,7 +61,7 @@ final class DoctrineApplicationRepositoryTest extends ApiTestCase
 
     private function applicationRepository(): ApplicationRepositoryInterface
     {
-        $repository = static::getContainer()->get(ApplicationRepositoryInterface::class);
+        $repository = self::getContainer()->get(ApplicationRepositoryInterface::class);
         self::assertInstanceOf(ApplicationRepositoryInterface::class, $repository);
 
         return $repository;

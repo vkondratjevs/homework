@@ -95,9 +95,7 @@ final class ListApplicationsTest extends ApiTestCase
             'currency' => 'EUR',
         ]);
 
-        /** @var ApplicationShape $body */
-        $body = $this->decodeJsonResponse();
-
-        return $body;
+        /** @var ApplicationShape */
+        return $this->decodeJsonResponse();
     }
 }

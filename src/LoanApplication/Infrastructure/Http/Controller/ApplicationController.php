@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\LoanApplication\Infrastructure\Http\Controller;
 
 use App\LoanApplication\Application\Command\CreateApplication;
-use App\LoanApplication\Application\Handler\CreateApplicationHandler;
+use App\LoanApplication\Application\Handler\CreateApplicationHandlerInterface;
 use App\LoanApplication\Domain\Exception\ApplicationNotFoundException;
 use App\LoanApplication\Domain\Repository\ApplicationRepositoryInterface;
 use App\LoanApplication\Infrastructure\Http\Dto\ApplicationResponse;
@@ -28,7 +28,7 @@ final class ApplicationController extends AbstractController
     private const int MAX_PAGE_SIZE = 100;
 
     public function __construct(
-        private readonly CreateApplicationHandler $createApplicationHandler,
+        private readonly CreateApplicationHandlerInterface $createApplicationHandler,
         private readonly ApplicationRepositoryInterface $applications,
     ) {
     }
