@@ -11,6 +11,7 @@
         "doctrine/doctrine-migrations-bundle": "^4.0",
         "doctrine/orm": "^3.7",
         "nelmio/api-doc-bundle": "^5.12",
+        "symfony/amqp-messenger": "8.1.*",
         "symfony/asset": "8.1.*",
         "symfony/console": "8.1.*",
         "symfony/doctrine-messenger": "8.1.*",
