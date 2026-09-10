@@ -16,7 +16,7 @@ framework:
             applications_outbox_failed:
                 dsn: 'doctrine://default?queue_name=applications_outbox_failed'
                 options:
-                    table_name: outbox_messages
+                    table_name: failed_messages
                     auto_setup: false
 
             applications_verification:
@@ -31,7 +31,7 @@ framework:
             applications_verification_failed:
                 dsn: 'doctrine://default?queue_name=applications_verification_failed'
                 options:
-                    table_name: outbox_messages
+                    table_name: failed_messages
                     auto_setup: false
             # // @todo
             # applications_verification_failed:
