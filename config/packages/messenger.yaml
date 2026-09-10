@@ -22,9 +22,10 @@ framework:
             applications_verification:
                 dsn: '%env(RABBITMQ_VERIFICATION_DSN)%'
                 retry_strategy:
-                    max_retries: 3
+                    max_retries: 10
                     delay: 1000
                     multiplier: 2
+                    max_delay: 10000
                 failure_transport: applications_verification_failed
 
             applications_verification_failed:

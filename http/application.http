@@ -2,11 +2,19 @@
 
 ### Create
 
+#'010101-00001' => 'approve',
+#'010101-00002' => 'reject',
+#'010101-00429' => 'too_many_requests',
+#'010101-00500' => 'server_error',
+#'010101-00400' => 'bad_request',
+#'010101-00408' => 'never_responds',
+#'010101-00050' => 'random',
+
 POST {{host}}/applications
 Content-Type: application/json
 
 {
-    "personalCode": "123456-78901",
+    "personalCode": "010101-00429",
     "amount": "1500.00",
     "term": 12,
     "currency": "EUR"
@@ -14,7 +22,7 @@ Content-Type: application/json
 
 
 ### Get by ID
-GET {{host}}/applications/01a08527-894b-74df-b66f-8eaaaf6b0ae0
+GET {{host}}/applications/01a08be3-5374-76c3-bb81-6014b05a6d30
 Content-Type: application/json
 
 ### Verify
