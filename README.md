@@ -113,6 +113,8 @@ docker compose up -d --scale worker-outbox=5 --scale worker-verification=5
 
 ## Given more time
 
+- **Authentication & authorization.**
+The API currently has no access control and exposes `personalCode` in responses. A production version would require authentication, authorization, and masking of sensitive data.
 - **Failed message handling.**
 Add monitoring and notifications for failed messages, with an option to review and retry them manually.
 - **Vendor response caching.**

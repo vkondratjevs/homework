@@ -33,9 +33,6 @@ framework:
                 options:
                     table_name: failed_messages
                     auto_setup: false
-            # // @todo
-            # applications_verification_failed:
-            #     dsn: '%env(RABBITMQ_VERIFICATION_FAILED_DSN)%'
 
         routing:
             App\LoanApplication\Application\Command\CheckBorrower: applications_outbox
