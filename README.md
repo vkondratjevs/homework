@@ -22,12 +22,16 @@ it is moved to a failed-message queue instead of being lost.
 ## Quick start
 
 ```bash
+docker compose run --rm php composer install
 docker compose up -d --build
 docker compose exec php bin/console doctrine:migrations:migrate --no-interaction
 ```
 
-API: `http://localhost:8080`. Interactive docs: `http://localhost:8080/api/doc/`.
-RabbitMQ UI: `http://localhost:15672` (guest/guest).
+API: [http://localhost:8080](http://localhost:8080).
+
+Interactive docs: [http://localhost:8080/api/doc/](http://localhost:8080/api/doc/).
+
+RabbitMQ UI: [http://localhost:15672](http://localhost:15672) (guest/guest).
 
 The workers start automatically with Docker Compose. No additional setup is required.
 
@@ -94,6 +98,10 @@ If a message is delivered again after the application has already been resolved,
 **Retry policy.**
 This applies specifically to the RabbitMQ verification queue. Only temporary errors (`429`, `5xx`, and timeouts) are retried.
 A `400 Bad Request` is not retried because sending the same invalid request again would produce the same result.
+
+**Why failed messages are stored in Postgres.**
+Failed messages are stored separately from RabbitMQ so they remain available for inspection and recovery independently of the broker.
+Using Postgres also keeps both failed transports in one place and makes them easy to manage using standard database tools.
 
 ## Scaling the workers
 
