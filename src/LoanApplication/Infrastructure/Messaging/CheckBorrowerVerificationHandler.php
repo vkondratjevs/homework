@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\LoanApplication\Infrastructure\Messaging;
 
 use App\LoanApplication\Application\Command\RelayedCheckBorrower;
-use App\LoanApplication\Application\Service\ApplicationResolver;
+use App\LoanApplication\Application\Service\ApplicationStatusResolver;
 use App\LoanApplication\Domain\Enum\ApplicationStatus;
 use App\LoanApplication\Domain\Exception\ApplicationNotFoundException;
 use App\LoanApplication\Domain\Repository\ApplicationRepositoryInterface;
@@ -22,7 +22,7 @@ final readonly class CheckBorrowerVerificationHandler
     public function __construct(
         private ApplicationRepositoryInterface $applications,
         private BorrowerVerificationClientInterface $verificationClient,
-        private ApplicationResolver $applicationResolver,
+        private ApplicationStatusResolver $applicationStatusResolver,
         private LoggerInterface $logger,
     ) {
     }
@@ -56,7 +56,7 @@ final readonly class CheckBorrowerVerificationHandler
                 'error' => $e->getMessage(),
             ]);
 
-            $isUpdated = $this->applicationResolver->failVerification($application);
+            $isUpdated = $this->applicationStatusResolver->failVerification($application);
 
             if (!$isUpdated) {
                 $this->logger->info('Application status was not updated: it had already been resolved.', [
@@ -67,9 +67,14 @@ final readonly class CheckBorrowerVerificationHandler
             return;
         }
 
+        $this->logger->info('Credit bureau returned a verification decision.', [
+            'applicationId' => $application->getId()->toRfc4122(),
+            'decision' => $decision->name,
+        ]);
+
         $isUpdated = match ($decision) {
-            VerificationDecision::Approve => $this->applicationResolver->approve($application),
-            VerificationDecision::Reject => $this->applicationResolver->reject($application),
+            VerificationDecision::Approve => $this->applicationStatusResolver->approve($application),
+            VerificationDecision::Reject => $this->applicationStatusResolver->reject($application),
         };
 
         if (!$isUpdated) {

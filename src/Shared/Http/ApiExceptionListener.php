@@ -10,7 +10,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
-use Symfony\Component\Serializer\Exception\PartialDenormalizationException;
+use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 use Symfony\Component\Validator\ConstraintViolationListInterface;
 use Symfony\Component\Validator\Exception\ValidationFailedException;
 
@@ -27,18 +27,14 @@ final class ApiExceptionListener
             return;
         }
 
-        foreach ($this->chain($exception) as $cause) {
-            if ($cause instanceof ValidationFailedException) {
-                $event->setResponse($this->unprocessable($this->fromViolations($cause->getViolations())));
+        $validationFailure = $exception instanceof UnprocessableEntityHttpException
+            ? $exception->getPrevious()
+            : null;
 
-                return;
-            }
+        if ($validationFailure instanceof ValidationFailedException) {
+            $event->setResponse($this->unprocessable($this->fromViolations($validationFailure->getViolations())));
 
-            if ($cause instanceof PartialDenormalizationException) {
-                $event->setResponse($this->unprocessable($this->fromDenormalizationErrors($cause)));
-
-                return;
-            }
+            return;
         }
 
         if ($exception instanceof HttpExceptionInterface) {
@@ -49,17 +45,6 @@ final class ApiExceptionListener
         }
     }
 
-    /** @return list<\Throwable> */
-    private function chain(\Throwable $exception): array
-    {
-        $chain = [];
-        for ($e = $exception; $e !== null; $e = $e->getPrevious()) {
-            $chain[] = $e;
-        }
-
-        return $chain;
-    }
-
     /** @return list<array{field: string, message: string}> */
     private function fromViolations(ConstraintViolationListInterface $violations): array
     {
@@ -68,20 +53,6 @@ final class ApiExceptionListener
             $errors[] = [
                 'field' => $violation->getPropertyPath(),
                 'message' => (string) $violation->getMessage(),
-            ];
-        }
-
-        return $errors;
-    }
-
-    /** @return list<array{field: string, message: string}> */
-    private function fromDenormalizationErrors(PartialDenormalizationException $exception): array
-    {
-        $errors = [];
-        foreach ($exception->getNotNormalizableValueErrors() as $error) {
-            $errors[] = [
-                'field' => $error->getPath() ?? '',
-                'message' => $error->getMessage(),
             ];
         }
 

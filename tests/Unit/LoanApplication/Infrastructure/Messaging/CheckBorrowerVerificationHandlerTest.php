@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Tests\Unit\LoanApplication\Infrastructure\Messaging;
 
 use App\LoanApplication\Application\Command\RelayedCheckBorrower;
-use App\LoanApplication\Application\Service\ApplicationResolver;
+use App\LoanApplication\Application\Service\ApplicationStatusResolver;
 use App\LoanApplication\Domain\Entity\Application;
 use App\LoanApplication\Domain\Enum\ApplicationStatus;
 use App\LoanApplication\Domain\Exception\ApplicationNotFoundException;
@@ -35,7 +35,7 @@ final class CheckBorrowerVerificationHandlerTest extends TestCase
         $handler = new CheckBorrowerVerificationHandler(
             $repository,
             $verificationClient,
-            new ApplicationResolver($repository),
+            new ApplicationStatusResolver($repository),
             $this->createStub(LoggerInterface::class),
         );
 
@@ -58,7 +58,7 @@ final class CheckBorrowerVerificationHandlerTest extends TestCase
         $handler = new CheckBorrowerVerificationHandler(
             $repository,
             $verificationClient,
-            new ApplicationResolver($repository),
+            new ApplicationStatusResolver($repository),
             $this->createStub(LoggerInterface::class),
         );
 
@@ -81,7 +81,7 @@ final class CheckBorrowerVerificationHandlerTest extends TestCase
         $handler = new CheckBorrowerVerificationHandler(
             $repository,
             $verificationClient,
-            new ApplicationResolver($repository),
+            new ApplicationStatusResolver($repository),
             $this->createStub(LoggerInterface::class),
         );
 
@@ -103,7 +103,7 @@ final class CheckBorrowerVerificationHandlerTest extends TestCase
         $handler = new CheckBorrowerVerificationHandler(
             $repository,
             $verificationClient,
-            new ApplicationResolver($repository),
+            new ApplicationStatusResolver($repository),
             $this->createStub(LoggerInterface::class),
         );
 
@@ -122,7 +122,7 @@ final class CheckBorrowerVerificationHandlerTest extends TestCase
         $handler = new CheckBorrowerVerificationHandler(
             $repository,
             $this->createStub(BorrowerVerificationClientInterface::class),
-            new ApplicationResolver($repository),
+            new ApplicationStatusResolver($repository),
             $this->createStub(LoggerInterface::class),
         );
 
@@ -143,12 +143,12 @@ final class CheckBorrowerVerificationHandlerTest extends TestCase
         $verificationClient->method('verify')->willReturn(VerificationDecision::Approve);
 
         $logger = $this->createMock(LoggerInterface::class);
-        $logger->expects($this->once())->method('info');
+        $logger->expects($this->exactly(2))->method('info');
 
         $handler = new CheckBorrowerVerificationHandler(
             $repository,
             $verificationClient,
-            new ApplicationResolver($repository),
+            new ApplicationStatusResolver($repository),
             $logger,
         );
 
@@ -169,7 +169,7 @@ final class CheckBorrowerVerificationHandlerTest extends TestCase
         $handler = new CheckBorrowerVerificationHandler(
             $repository,
             $verificationClient,
-            new ApplicationResolver($repository),
+            new ApplicationStatusResolver($repository),
             $this->createStub(LoggerInterface::class),
         );
 

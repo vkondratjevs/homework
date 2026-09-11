@@ -37,6 +37,7 @@ services:
 
     rabbitmq:
         image: rabbitmq:3-management-alpine
+        hostname: rabbitmq
         ports:
             - "5672:5672"
             - "15672:15672"
@@ -46,6 +47,8 @@ services:
             timeout: 5s
             retries: 5
             start_period: 30s
+        volumes:
+            - rabbitmq_data:/var/lib/rabbitmq
 
     nginx:
         image: nginx:alpine
@@ -75,3 +78,4 @@ services:
 
 volumes:
     database_data:
+    rabbitmq_data:

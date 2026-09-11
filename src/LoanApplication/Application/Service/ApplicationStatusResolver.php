@@ -7,7 +7,7 @@ namespace App\LoanApplication\Application\Service;
 use App\LoanApplication\Domain\Entity\Application;
 use App\LoanApplication\Domain\Repository\ApplicationRepositoryInterface;
 
-final readonly class ApplicationResolver
+final readonly class ApplicationStatusResolver
 {
     public function __construct(
         private ApplicationRepositoryInterface $applications,

@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace App\Tests\Unit\LoanApplication\Application\Service;
 
-use App\LoanApplication\Application\Service\ApplicationResolver;
+use App\LoanApplication\Application\Service\ApplicationStatusResolver;
 use App\LoanApplication\Domain\Entity\Application;
 use App\LoanApplication\Domain\Enum\ApplicationStatus;
 use App\LoanApplication\Domain\Repository\ApplicationRepositoryInterface;
 use PHPUnit\Framework\TestCase;
 
-final class ApplicationResolverTest extends TestCase
+final class ApplicationStatusResolverTest extends TestCase
 {
     public function testApproveTransitionsTheEntityAndPersistsTheChange(): void
     {
@@ -22,7 +22,7 @@ final class ApplicationResolverTest extends TestCase
             ->with($application, ApplicationStatus::Pending)
             ->willReturn(true);
 
-        $result = new ApplicationResolver($repository)->approve($application);
+        $result = new ApplicationStatusResolver($repository)->approve($application);
 
         self::assertTrue($result);
         self::assertSame(ApplicationStatus::Approved, $application->getStatus());
@@ -38,7 +38,7 @@ final class ApplicationResolverTest extends TestCase
             ->with($application, ApplicationStatus::Pending)
             ->willReturn(true);
 
-        $result = new ApplicationResolver($repository)->reject($application);
+        $result = new ApplicationStatusResolver($repository)->reject($application);
 
         self::assertTrue($result);
         self::assertSame(ApplicationStatus::Rejected, $application->getStatus());
@@ -54,7 +54,7 @@ final class ApplicationResolverTest extends TestCase
             ->with($application, ApplicationStatus::Pending)
             ->willReturn(true);
 
-        $result = new ApplicationResolver($repository)->failVerification($application);
+        $result = new ApplicationStatusResolver($repository)->failVerification($application);
 
         self::assertTrue($result);
         self::assertSame(ApplicationStatus::VerificationFailed, $application->getStatus());
@@ -67,7 +67,7 @@ final class ApplicationResolverTest extends TestCase
         $repository = $this->createStub(ApplicationRepositoryInterface::class);
         $repository->method('updateStatus')->willReturn(false);
 
-        $result = new ApplicationResolver($repository)->approve($application);
+        $result = new ApplicationStatusResolver($repository)->approve($application);
 
         self::assertFalse($result);
     }

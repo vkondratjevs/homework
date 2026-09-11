@@ -9,6 +9,7 @@ use App\Shared\Http\ApiExceptionListener;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
+use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\Uid\Uuid;
 use Symfony\Component\Validator\ConstraintViolation;
@@ -44,7 +45,10 @@ final class ApiExceptionListenerTest extends TestCase
             new ConstraintViolation('must not be blank', null, [], null, 'personalCode', ''),
             new ConstraintViolation('must be between 10 and 30', null, [], null, 'term', 5),
         ]);
-        $exception = new ValidationFailedException(null, $violations);
+        $validationFailure = new ValidationFailedException(null, $violations);
+        // Mirrors RequestPayloadValueResolver: it never throws ValidationFailedException
+        // directly, it wraps it as the previous of an UnprocessableEntityHttpException.
+        $exception = new UnprocessableEntityHttpException('Validation failed.', $validationFailure);
 
         $event = $this->dispatch($exception);
 
