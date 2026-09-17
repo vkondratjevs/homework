@@ -31,7 +31,7 @@ API: [http://localhost:8080](http://localhost:8080).
 
 Interactive docs: [http://localhost:8080/api/doc/](http://localhost:8080/api/doc/).
 
-RabbitMQ UI: [http://localhost:15672](http://localhost:15672) (guest/guest).
+RabbitMQ UI: [http://localhost:15672](http://localhost:15672) (credentials from `RABBITMQ_USER`/`RABBITMQ_PASSWORD` in `.env`).
 
 The workers start automatically with Docker Compose. No additional setup is required.
 
